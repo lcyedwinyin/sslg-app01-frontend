@@ -17,37 +17,32 @@ function main() {
 
     // --- Element Selectors ---
     const authContainer = document.getElementById('auth-container');
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-    const confirmForm = document.getElementById('confirm-form');
     const appContent = document.getElementById('app-content');
-    const welcomeMessage = document.getElementById('welcome-message');
     
     // --- UI Toggling Functions ---
     function showAppContent(user) {
         authContainer.classList.add('hidden');
         appContent.classList.remove('hidden');
+        
+        const welcomeMessage = document.getElementById('welcome-message');
+        const emailInput = document.getElementById('email-input');
+        
         const userEmail = user.attributes.email;
         welcomeMessage.textContent = `Welcome, ${userEmail}!`;
         const savedEmail = localStorage.getItem('userEmailForNotifications');
-        document.getElementById('email-input').value = savedEmail || userEmail;
+        emailInput.value = savedEmail || userEmail;
+
+        // --- FIX: Attach event listeners only AFTER the app content is visible ---
+        setupAppEventListeners();
     }
 
     function showAuthContainer(formToShow = 'signin') {
         appContent.classList.add('hidden');
         authContainer.classList.remove('hidden');
         
-        signinForm.classList.add('hidden');
-        signupForm.classList.add('hidden');
-        confirmForm.classList.add('hidden');
-
-        if (formToShow === 'signup') {
-            signupForm.classList.remove('hidden');
-        } else if (formToShow === 'confirm') {
-            confirmForm.classList.remove('hidden');
-        } else {
-            signinForm.classList.remove('hidden');
-        }
+        document.getElementById('signin-form').classList.toggle('hidden', formToShow !== 'signin');
+        document.getElementById('signup-form').classList.toggle('hidden', formToShow !== 'signup');
+        document.getElementById('confirm-form').classList.toggle('hidden', formToShow !== 'confirm');
     }
 
     // --- Authentication Logic ---
@@ -75,7 +70,7 @@ function main() {
     }
 
     async function handleConfirmSignUp() {
-        const email = document.getElementById('signup-email').value;
+        const email = document.getElementById('signup-email').value; // This needs to persist from the signup form
         const code = document.getElementById('confirm-code').value;
         try {
             await Amplify.Auth.confirmSignUp(email, code);
@@ -86,16 +81,22 @@ function main() {
         }
     }
 
-    // --- Event Listeners ---
+    // --- Event Listener Setup ---
+    // Listeners for the forms that are always present
     document.getElementById('signin-button').addEventListener('click', handleSignIn);
     document.getElementById('signup-button').addEventListener('click', handleSignUp);
     document.getElementById('confirm-button').addEventListener('click', handleConfirmSignUp);
-    document.getElementById('sign-out-button').addEventListener('click', () => Amplify.Auth.signOut().then(() => showAuthContainer()));
     document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); showAuthContainer('signup'); });
     document.getElementById('show-signin').addEventListener('click', (e) => { e.preventDefault(); showAuthContainer('signin'); });
 
-    // Upload logic remains the same
-    document.getElementById('upload-button').addEventListener('click', async () => {
+    // This function sets up listeners for the main app content
+    function setupAppEventListeners() {
+        document.getElementById('sign-out-button').addEventListener('click', () => Amplify.Auth.signOut().then(() => showAuthContainer()));
+        document.getElementById('upload-button').addEventListener('click', handleUpload);
+    }
+
+    // The upload logic itself
+    async function handleUpload() {
         const fileInput = document.getElementById('file-input');
         const emailInput = document.getElementById('email-input');
         const uploadButton = document.getElementById('upload-button');
@@ -150,9 +151,10 @@ function main() {
         } finally {
             uploadButton.disabled = false;
         }
-    });
+    }
 
-    // Check initial auth state
+    // --- Initial State Check ---
+    // Check if a user is already signed in when the page loads
     Amplify.Auth.currentAuthenticatedUser()
         .then(user => showAppContent(user))
         .catch(() => showAuthContainer());
