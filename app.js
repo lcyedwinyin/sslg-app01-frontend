@@ -1,6 +1,5 @@
-// The Amplify, Auth, and Hub objects are now available globally 
-// because we loaded them via the <script> tag in index.html.
-// We no longer need to import them here.
+// The Amplify, Auth, and Hub objects are available globally because they are
+// loaded via the <script> tag in index.html before this script runs (due to 'defer').
 
 // --- Configuration ---
 const awsconfig = {
@@ -13,7 +12,7 @@ const awsconfig = {
 const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.amazonaws.com/';
 
 // --- Main Application Logic ---
-async function main() {
+function main() {
     // Configure Amplify first
     Amplify.configure(awsconfig);
 
@@ -29,10 +28,10 @@ async function main() {
     // Use the Amplify Hub to listen for authentication events
     Amplify.Hub.listen('auth', ({ payload: { event, data } }) => {
         switch (event) {
-            case 'signIn': // Event name is slightly different in v4
+            case 'signIn':
                 showAppContent();
                 break;
-            case 'signOut': // Event name is slightly different in v4
+            case 'signOut':
                 showAuthenticator();
                 break;
         }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Translation Service</title>
     
-    <!-- FIX: Load the stable, bundled AWS Amplify libraries -->
+    <!-- Load the stable, bundled AWS Amplify libraries -->
     <script src="https://unpkg.com/aws-amplify@4/dist/aws-amplify.min.js"></script>
     
     <!-- Basic stylesheet for a clean look -->
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <!-- Our app logic now runs after the Amplify library has been loaded -->
-    <script type="module" src="app.js"></script>
+    <!-- FIX: The script is now deferred, ensuring it runs after the HTML is parsed -->
+    <script src="app.js" defer></script>
 </body>
 </html>
