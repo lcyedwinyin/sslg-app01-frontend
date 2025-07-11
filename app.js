@@ -1,7 +1,8 @@
 // --- FIX APPLIED HERE ---
-// The CDN URLs have been corrected to point to the valid ES Module builds.
-import { Amplify, Auth, Hub } from 'https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/esm/index.js';
-import { applyPolyfills, defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-components@1/dist/esm/loader.js';
+// Switched to the esm.sh CDN, which is specifically designed to serve
+// modern JavaScript modules for direct browser import.
+import { Amplify, Auth, Hub } from 'https://esm.sh/aws-amplify@5';
+import 'https://esm.sh/@aws-amplify/ui-components@1';
 
 // --- Configuration ---
 const awsconfig = {
@@ -15,10 +16,6 @@ const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.am
 
 // --- Main Application Logic ---
 async function main() {
-    // Apply polyfills and define the custom elements for the UI components
-    await applyPolyfills();
-    defineCustomElements(window);
-    
     // Configure Amplify first
     Amplify.configure(awsconfig);
 
