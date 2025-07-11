@@ -4,13 +4,15 @@ import '@aws-amplify/ui-components';
 
 // --- Configuration ---
 const awsconfig = {
-    "aws_project_region": "ap-northeast-1", // Cognito region
+    "aws_project_region": "ap-northeast-1", // Aligned with your other services
     "aws_cognito_region": "ap-northeast-1",
     "aws_user_pools_id": "ap-northeast-1_FySpl0LW5",
     "aws_user_pools_web_client_id": "7h3ss3vjn49hemb6f8t9tg13vn"
 };
 
-const API_GATEWAY_INVOKE_URL = 'https://5i66lfpob2.execute-api.us-east-1.amazonaws.com/';
+// --- UPDATED ---
+// This is the new Invoke URL for your API Gateway in ap-northeast-1
+const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.amazonaws.com/';
 
 Amplify.configure(awsconfig);
 
