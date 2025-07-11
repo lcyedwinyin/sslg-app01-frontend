@@ -13,6 +13,7 @@ const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.am
 
 // --- Main Application Logic ---
 function main() {
+    // This function will now only run after the entire page is loaded.
     Amplify.configure(awsconfig);
 
     // --- Element Selectors ---
@@ -32,7 +33,7 @@ function main() {
         const savedEmail = localStorage.getItem('userEmailForNotifications');
         emailInput.value = savedEmail || userEmail;
 
-        // --- FIX: Attach event listeners only AFTER the app content is visible ---
+        // Attach event listeners only AFTER the app content is visible
         setupAppEventListeners();
     }
 
@@ -160,5 +161,7 @@ function main() {
         .catch(() => showAuthContainer());
 }
 
-// Run the main application logic
-main();
+// --- FIX APPLIED HERE ---
+// This ensures that our main() function only runs after the entire page,
+// including the external Amplify library script, is fully loaded.
+window.addEventListener('load', main);
