@@ -1,5 +1,4 @@
-// The Amplify, Auth, and Hub objects are now available globally 
-// because we loaded them via the <script> tags in index.html.
+// The Amplify object is available globally from the <script> tag in index.html.
 
 // --- Configuration ---
 const awsconfig = {
@@ -14,55 +13,94 @@ const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.am
 
 // --- Main Application Logic ---
 function main() {
-    // Configure Amplify first
     Amplify.configure(awsconfig);
 
-    const authenticator = document.querySelector('amplify-authenticator');
+    // --- Element Selectors ---
+    const authContainer = document.getElementById('auth-container');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    const confirmForm = document.getElementById('confirm-form');
     const appContent = document.getElementById('app-content');
     const welcomeMessage = document.getElementById('welcome-message');
-    const signOutButton = document.getElementById('sign-out-button');
-    const emailInput = document.getElementById('email-input');
-    const fileInput = document.getElementById('file-input');
-    const uploadButton = document.getElementById('upload-button');
-    const statusMessage = document.getElementById('status-message');
-
-    // Use the Amplify Hub to listen for authentication events
-    Amplify.Hub.listen('auth', ({ payload: { event, data } }) => {
-        switch (event) {
-            case 'signedIn':
-            case 'autoSignIn': // Handle automatic sign-in on page refresh
-                showAppContent(data);
-                break;
-            case 'signOut':
-                showAuthenticator();
-                break;
-        }
-    });
-
-    // Function to show the main app and hide the login
+    
+    // --- UI Toggling Functions ---
     function showAppContent(user) {
-        authenticator.style.display = 'none'; // Use style to hide
+        authContainer.classList.add('hidden');
         appContent.classList.remove('hidden');
-        
         const userEmail = user.attributes.email;
         welcomeMessage.textContent = `Welcome, ${userEmail}!`;
-        
         const savedEmail = localStorage.getItem('userEmailForNotifications');
-        emailInput.value = savedEmail || userEmail;
+        document.getElementById('email-input').value = savedEmail || userEmail;
     }
 
-    // Function to show the login and hide the main app
-    function showAuthenticator() {
+    function showAuthContainer(formToShow = 'signin') {
         appContent.classList.add('hidden');
-        authenticator.style.display = 'block'; // Use style to show
-    }
-    
-    // --- Event Listeners for Buttons ---
-    signOutButton.addEventListener('click', () => {
-        Amplify.Auth.signOut();
-    });
+        authContainer.classList.remove('hidden');
+        
+        signinForm.classList.add('hidden');
+        signupForm.classList.add('hidden');
+        confirmForm.classList.add('hidden');
 
-    uploadButton.addEventListener('click', async () => {
+        if (formToShow === 'signup') {
+            signupForm.classList.remove('hidden');
+        } else if (formToShow === 'confirm') {
+            confirmForm.classList.remove('hidden');
+        } else {
+            signinForm.classList.remove('hidden');
+        }
+    }
+
+    // --- Authentication Logic ---
+    async function handleSignIn() {
+        const email = document.getElementById('signin-email').value;
+        const password = document.getElementById('signin-password').value;
+        try {
+            const user = await Amplify.Auth.signIn(email, password);
+            showAppContent(user);
+        } catch (error) {
+            alert(`Sign in failed: ${error.message}`);
+        }
+    }
+
+    async function handleSignUp() {
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        try {
+            await Amplify.Auth.signUp({ username: email, password, attributes: { email } });
+            alert('Sign up successful! Please check your email for a verification code.');
+            showAuthContainer('confirm');
+        } catch (error) {
+            alert(`Sign up failed: ${error.message}`);
+        }
+    }
+
+    async function handleConfirmSignUp() {
+        const email = document.getElementById('signup-email').value;
+        const code = document.getElementById('confirm-code').value;
+        try {
+            await Amplify.Auth.confirmSignUp(email, code);
+            alert('Account confirmed! You can now sign in.');
+            showAuthContainer('signin');
+        } catch (error) {
+            alert(`Confirmation failed: ${error.message}`);
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('signin-button').addEventListener('click', handleSignIn);
+    document.getElementById('signup-button').addEventListener('click', handleSignUp);
+    document.getElementById('confirm-button').addEventListener('click', handleConfirmSignUp);
+    document.getElementById('sign-out-button').addEventListener('click', () => Amplify.Auth.signOut().then(() => showAuthContainer()));
+    document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); showAuthContainer('signup'); });
+    document.getElementById('show-signin').addEventListener('click', (e) => { e.preventDefault(); showAuthContainer('signin'); });
+
+    // Upload logic remains the same
+    document.getElementById('upload-button').addEventListener('click', async () => {
+        const fileInput = document.getElementById('file-input');
+        const emailInput = document.getElementById('email-input');
+        const uploadButton = document.getElementById('upload-button');
+        const statusMessage = document.getElementById('status-message');
+
         if (!fileInput.files.length || !emailInput.value) {
             statusMessage.textContent = "Please select files and enter an email.";
             statusMessage.style.color = 'red';
@@ -80,17 +118,11 @@ function main() {
 
             const response = await fetch(API_GATEWAY_INVOKE_URL + 'generate-upload-url', {
                 method: 'POST',
-                headers: {
-                    'Authorization': jwtToken,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Authorization': jwtToken, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailInput.value, filenames: filenames })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Could not get secure upload links.');
-            }
+            if (!response.ok) throw new Error('Could not get secure upload links.');
 
             const { uploadUrls } = await response.json();
             statusMessage.textContent = `Uploading ${uploadUrls.length} file(s)...`;
@@ -107,7 +139,7 @@ function main() {
             await Promise.all(uploadPromises);
 
             localStorage.setItem('userEmailForNotifications', emailInput.value);
-            statusMessage.textContent = "Upload complete! Your files are being processed. You will receive an email notification when it's done.";
+            statusMessage.textContent = "Upload complete! You will receive an email notification when it's done.";
             statusMessage.style.color = 'green';
             fileInput.value = "";
 
@@ -120,10 +152,10 @@ function main() {
         }
     });
 
-    // Check the initial auth state when the page loads
+    // Check initial auth state
     Amplify.Auth.currentAuthenticatedUser()
         .then(user => showAppContent(user))
-        .catch(() => showAuthenticator());
+        .catch(() => showAuthContainer());
 }
 
 // Run the main application logic

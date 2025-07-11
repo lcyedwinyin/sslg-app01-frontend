@@ -5,31 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Translation Service</title>
     
-    <!-- FIX: Loading the modern, separate Amplify libraries from a reliable CDN -->
-    <!-- This loads the UI components like <amplify-authenticator> -->
-    <script type="module" src="https://unpkg.com/@aws-amplify/ui-components@1.9.40/dist/aws-amplify-ui-components.esm.js"></script>
-    <!-- This loads the main Amplify library for configuration and logic -->
+    <!-- Only the core Amplify library is needed now -->
     <script src="https://unpkg.com/aws-amplify@5/dist/aws-amplify.min.js"></script>
     
     <!-- Basic stylesheet for a clean look -->
     <style>
         body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f4f4f9; margin: 0; }
         #app-container { background: white; padding: 2rem 3rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 100%; }
-        amplify-authenticator { --amplify-components-button-primary-background-color: #4F81BD; }
-        .upload-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+        .upload-form, .auth-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
         input, button { padding: 0.75rem; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; }
         button { background-color: #4F81BD; color: white; cursor: pointer; border: none; }
         button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
         #status-message { margin-top: 1rem; font-weight: bold; }
         .hidden { display: none; }
+        .auth-toggle { color: #007bff; cursor: pointer; text-decoration: underline; font-size: 0.9rem; margin-top: 1rem; }
     </style>
 </head>
 <body>
     <div id="app-container">
-        <!-- The Amplify Login Portal -->
-        <amplify-authenticator></amplify-authenticator>
+        <!-- Custom Login/Signup Forms -->
+        <div id="auth-container">
+            <div id="signin-form" class="auth-form">
+                <h2>Sign In</h2>
+                <input type="email" id="signin-email" placeholder="Email" required>
+                <input type="password" id="signin-password" placeholder="Password" required>
+                <button id="signin-button">Sign In</button>
+                <p class="auth-toggle" id="show-signup">Don't have an account? Sign up</p>
+            </div>
+            
+            <div id="signup-form" class="auth-form hidden">
+                <h2>Sign Up</h2>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button id="signup-button">Sign Up</button>
+                <p class="auth-toggle" id="show-signin">Already have an account? Sign in</p>
+            </div>
 
-        <!-- This is the main application content, hidden by default -->
+            <div id="confirm-form" class="auth-form hidden">
+                <h2>Confirm Sign Up</h2>
+                <p>A verification code has been sent to your email.</p>
+                <input type="text" id="confirm-code" placeholder="Verification Code" required>
+                <button id="confirm-button">Confirm Account</button>
+            </div>
+        </div>
+
+        <!-- Main application content, hidden by default -->
         <div id="app-content" class="hidden">
             <h1>Excel Translation Service</h1>
             <p id="welcome-message"></p>
@@ -46,7 +66,7 @@
         </div>
     </div>
 
-    <!-- Our app logic now runs after the Amplify libraries have been loaded -->
+    <!-- Our app logic -->
     <script src="app.js" defer></script>
 </body>
 </html>
