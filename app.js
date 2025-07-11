@@ -1,8 +1,7 @@
 // --- FIX APPLIED HERE ---
-// We are now importing the Amplify libraries directly from a CDN URL.
-// This allows the browser to find and load the necessary code without a build step.
-import { Amplify, Auth, Hub } from 'https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/aws-amplify.min.js';
-import { applyPolyfills, defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-components@1/loader/index.es2017.js';
+// The CDN URLs have been corrected to point to the valid file locations.
+import { Amplify, Auth, Hub } from 'https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/browser/aws-amplify.min.js';
+import { applyPolyfills, defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-components@1/dist/loader/index.js';
 
 // --- Configuration ---
 const awsconfig = {
