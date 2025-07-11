@@ -14,32 +14,30 @@
         button { background-color: #4F81BD; color: white; cursor: pointer; border: none; }
         button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
         #status-message { margin-top: 1rem; font-weight: bold; }
+        /* This class will be used to hide elements */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div id="app-container">
-        <!-- The Amplify Login Portal will wrap the application -->
-        <amplify-authenticator>
-            <!-- This template contains the content that is ONLY shown AFTER a user logs in -->
-            <template v-slot="{ user, signOut }">
-                <h1>Excel Translation Service</h1>
-                <p>Welcome, {{ user.signInDetails.loginId }}!</p>
-                
-                <div class="upload-form">
-                    <p>Select one or more .xls files to begin.</p>
-                    
-                    <input type="file" id="file-input" multiple accept=".xls">
-                    
-                    <input type="email" id="email-input" placeholder="Enter your email for notifications" required>
-                    
-                    <button id="upload-button">Upload and Start Process</button>
-                    
-                    <div id="status-message"></div>
-                </div>
-                
-                <button @click="signOut" style="margin-top: 2rem; background-color: #6c757d;">Sign Out</button>
-            </template>
-        </amplify-authenticator>
+        <!-- The Amplify Login Portal -->
+        <amplify-authenticator></amplify-authenticator>
+
+        <!-- This is the main application content, hidden by default -->
+        <div id="app-content" class="hidden">
+            <h1>Excel Translation Service</h1>
+            <p id="welcome-message"></p>
+            
+            <div class="upload-form">
+                <p>Select one or more .xls files to begin.</p>
+                <input type="file" id="file-input" multiple accept=".xls">
+                <input type="email" id="email-input" placeholder="Enter your email for notifications" required>
+                <button id="upload-button">Upload and Start Process</button>
+                <div id="status-message"></div>
+            </div>
+            
+            <button id="sign-out-button" style="margin-top: 2rem; background-color: #6c757d;">Sign Out</button>
+        </div>
     </div>
 
     <!-- This script will load the Amplify UI components and our app logic -->
