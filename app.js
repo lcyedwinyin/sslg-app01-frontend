@@ -1,7 +1,7 @@
 // --- FIX APPLIED HERE ---
-// The CDN URLs have been corrected to point to the valid file locations.
-import { Amplify, Auth, Hub } from 'https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/browser/aws-amplify.min.js';
-import { applyPolyfills, defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-components@1/dist/loader/index.js';
+// The CDN URLs have been corrected to point to the valid ES Module builds.
+import { Amplify, Auth, Hub } from 'https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/esm/index.js';
+import { applyPolyfills, defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-components@1/dist/esm/loader.js';
 
 // --- Configuration ---
 const awsconfig = {
