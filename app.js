@@ -1,3 +1,98 @@
+// Add this right at the beginning of app.js
+console.log('app.js loaded and executing');
+
+// --- Main Application Logic ---
+function main() {
+    console.log('main() function called');
+    
+    // Use window.Amplify to ensure we're referencing the global object
+    if (typeof window.Amplify === 'undefined') {
+        console.error('Amplify is not available. Please check if the CDN loaded correctly.');
+        return;
+    }
+
+    console.log('Amplify is available, configuring...');
+    
+    // Configure Amplify with the correct v6 format
+    window.Amplify.configure(awsconfig);
+    
+    console.log('Amplify configured successfully');
+
+    // --- Element Selectors ---
+    const authContainer = document.getElementById('auth-container');
+    const appContent = document.getElementById('app-content');
+    
+    console.log('DOM elements found:', {
+        authContainer: !!authContainer,
+        appContent: !!appContent,
+        signinButton: !!document.getElementById('signin-button'),
+        signupButton: !!document.getElementById('signup-button')
+    });
+
+    // --- Authentication Logic ---
+    async function handleSignUp() {
+        console.log('handleSignUp called!'); // KEY DEBUG LOG
+        
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        
+        console.log('Form values:', { email, password }); // Don't log password in production
+        
+        if (!email || !password) {
+            console.log('Missing email or password');
+            alert('Please enter both email and password.');
+            return;
+        }
+        
+        console.log('Attempting sign up...');
+        
+        try {
+            const { isSignUpComplete, nextStep } = await window.Amplify.Auth.signUp({
+                username: email,
+                password: password,
+                options: {
+                    userAttributes: {
+                        email: email
+                    }
+                }
+            });
+            
+            console.log('Sign up successful:', { isSignUpComplete, nextStep });
+            alert('Sign up successful! Please check your email for a verification code.');
+            showAuthContainer('confirm');
+        } catch (error) {
+            console.error('Sign up error:', error);
+            alert(`Sign up failed: ${error.message}`);
+        }
+    }
+
+    // --- Event Listener Setup ---
+    console.log('Setting up event listeners...');
+    
+    document.getElementById('signin-button').addEventListener('click', handleSignIn);
+    document.getElementById('signup-button').addEventListener('click', handleSignUp);
+    document.getElementById('confirm-button').addEventListener('click', handleConfirmSignUp);
+    document.getElementById('show-signup').addEventListener('click', (e) => { 
+        console.log('show-signup clicked');
+        e.preventDefault(); 
+        showAuthContainer('signup'); 
+    });
+    document.getElementById('show-signin').addEventListener('click', (e) => { 
+        console.log('show-signin clicked');
+        e.preventDefault(); 
+        showAuthContainer('signin'); 
+    });
+
+    console.log('Event listeners attached successfully');
+    
+    // Rest of your code...
+}
+
+// Run the main application logic immediately
+console.log('About to call main()');
+main();
+console.log('main() call completed');
+
 // The Amplify object should now be available globally
 console.log('Amplify object:', window.Amplify); // Debug log
 
