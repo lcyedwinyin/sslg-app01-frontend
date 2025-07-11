@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Translation Service</title>
     
-    <!-- Only the core Amplify library is needed now -->
-    <script src="https://unpkg.com/aws-amplify@5/dist/aws-amplify.min.js"></script>
+    <!-- AWS Amplify v6 with better CDN support -->
+    <script src="https://cdn.jsdelivr.net/npm/aws-amplify@6/dist/aws-amplify.min.js"></script>
     
     <!-- Basic stylesheet for a clean look -->
     <style>
@@ -66,7 +66,23 @@
         </div>
     </div>
 
-    <!-- Our app logic -->
-    <script src="app.js" defer></script>
+    <!-- Our app logic - removed defer attribute -->
+    <script>
+        // Wait for both DOM and Amplify to be ready
+        function initializeApp() {
+            if (typeof window.Amplify !== 'undefined') {
+                // Load the main app script
+                const script = document.createElement('script');
+                script.src = 'app.js';
+                document.head.appendChild(script);
+            } else {
+                // Retry after a short delay
+                setTimeout(initializeApp, 100);
+            }
+        }
+        
+        // Start initialization when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
 </body>
 </html>
