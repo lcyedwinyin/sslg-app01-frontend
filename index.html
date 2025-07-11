@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Translation Service</title>
     
-    <!-- Load the stable, bundled AWS Amplify libraries -->
-    <script src="https://unpkg.com/aws-amplify@4/dist/aws-amplify.min.js"></script>
+    <!-- FIX: Loading the modern, separate Amplify libraries from a reliable CDN -->
+    <!-- This loads the UI components like <amplify-authenticator> -->
+    <script type="module" src="https://unpkg.com/@aws-amplify/ui-components@1.9.40/dist/aws-amplify-ui-components.esm.js"></script>
+    <!-- This loads the main Amplify library for configuration and logic -->
+    <script src="https://unpkg.com/aws-amplify@5/dist/aws-amplify.min.js"></script>
     
     <!-- Basic stylesheet for a clean look -->
     <style>
@@ -43,7 +46,7 @@
         </div>
     </div>
 
-    <!-- FIX: The script is now deferred, ensuring it runs after the HTML is parsed -->
+    <!-- Our app logic now runs after the Amplify libraries have been loaded -->
     <script src="app.js" defer></script>
 </body>
 </html>

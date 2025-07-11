@@ -1,12 +1,13 @@
-// The Amplify, Auth, and Hub objects are available globally because they are
-// loaded via the <script> tag in index.html before this script runs (due to 'defer').
+// The Amplify, Auth, and Hub objects are now available globally 
+// because we loaded them via the <script> tags in index.html.
 
 // --- Configuration ---
 const awsconfig = {
-    "aws_project_region": "ap-northeast-1", 
-    "aws_cognito_region": "ap-northeast-1",
-    "aws_user_pools_id": "ap-northeast-1_FySpl0LW5",
-    "aws_user_pools_web_client_id": "7h3ss3vjn49hemb6f8t9tg13vn"
+    Auth: {
+        region: "ap-northeast-1",
+        userPoolId: "ap-northeast-1_FySpl0LW5",
+        userPoolWebClientId: "7h3ss3vjn49hemb6f8t9tg13vn"
+    }
 };
 
 const API_GATEWAY_INVOKE_URL = 'https://w2bumno7gj.execute-api.ap-northeast-1.amazonaws.com/';
@@ -28,8 +29,9 @@ function main() {
     // Use the Amplify Hub to listen for authentication events
     Amplify.Hub.listen('auth', ({ payload: { event, data } }) => {
         switch (event) {
-            case 'signIn':
-                showAppContent();
+            case 'signedIn':
+            case 'autoSignIn': // Handle automatic sign-in on page refresh
+                showAppContent(data);
                 break;
             case 'signOut':
                 showAuthenticator();
@@ -38,25 +40,21 @@ function main() {
     });
 
     // Function to show the main app and hide the login
-    async function showAppContent() {
-        try {
-            const user = await Amplify.Auth.currentAuthenticatedUser();
-            authenticator.classList.add('hidden');
-            appContent.classList.remove('hidden');
-            const userEmail = user.attributes.email;
-            welcomeMessage.textContent = `Welcome, ${userEmail}!`;
-            const savedEmail = localStorage.getItem('userEmailForNotifications');
-            emailInput.value = savedEmail || userEmail;
-        } catch (err) {
-            console.log("User not signed in", err);
-            showAuthenticator();
-        }
+    function showAppContent(user) {
+        authenticator.style.display = 'none'; // Use style to hide
+        appContent.classList.remove('hidden');
+        
+        const userEmail = user.attributes.email;
+        welcomeMessage.textContent = `Welcome, ${userEmail}!`;
+        
+        const savedEmail = localStorage.getItem('userEmailForNotifications');
+        emailInput.value = savedEmail || userEmail;
     }
 
     // Function to show the login and hide the main app
     function showAuthenticator() {
         appContent.classList.add('hidden');
-        authenticator.classList.remove('hidden');
+        authenticator.style.display = 'block'; // Use style to show
     }
     
     // --- Event Listeners for Buttons ---
@@ -123,7 +121,9 @@ function main() {
     });
 
     // Check the initial auth state when the page loads
-    showAppContent();
+    Amplify.Auth.currentAuthenticatedUser()
+        .then(user => showAppContent(user))
+        .catch(() => showAuthenticator());
 }
 
 // Run the main application logic
