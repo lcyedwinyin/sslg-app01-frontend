@@ -1,8 +1,6 @@
-// --- FIX APPLIED HERE ---
-// Switched to the esm.sh CDN, which is specifically designed to serve
-// modern JavaScript modules for direct browser import.
-import { Amplify, Auth, Hub } from 'https://esm.sh/aws-amplify@5';
-import 'https://esm.sh/@aws-amplify/ui-components@1';
+// The Amplify, Auth, and Hub objects are now available globally 
+// because we loaded them via the <script> tag in index.html.
+// We no longer need to import them here.
 
 // --- Configuration ---
 const awsconfig = {
@@ -29,25 +27,31 @@ async function main() {
     const statusMessage = document.getElementById('status-message');
 
     // Use the Amplify Hub to listen for authentication events
-    Hub.listen('auth', ({ payload: { event, data } }) => {
+    Amplify.Hub.listen('auth', ({ payload: { event, data } }) => {
         switch (event) {
-            case 'signedIn':
-                showAppContent(data);
+            case 'signIn': // Event name is slightly different in v4
+                showAppContent();
                 break;
-            case 'signedOut':
+            case 'signOut': // Event name is slightly different in v4
                 showAuthenticator();
                 break;
         }
     });
 
     // Function to show the main app and hide the login
-    function showAppContent(user) {
-        authenticator.classList.add('hidden');
-        appContent.classList.remove('hidden');
-        const userEmail = user.signInDetails.loginId;
-        welcomeMessage.textContent = `Welcome, ${userEmail}!`;
-        const savedEmail = localStorage.getItem('userEmailForNotifications');
-        emailInput.value = savedEmail || userEmail;
+    async function showAppContent() {
+        try {
+            const user = await Amplify.Auth.currentAuthenticatedUser();
+            authenticator.classList.add('hidden');
+            appContent.classList.remove('hidden');
+            const userEmail = user.attributes.email;
+            welcomeMessage.textContent = `Welcome, ${userEmail}!`;
+            const savedEmail = localStorage.getItem('userEmailForNotifications');
+            emailInput.value = savedEmail || userEmail;
+        } catch (err) {
+            console.log("User not signed in", err);
+            showAuthenticator();
+        }
     }
 
     // Function to show the login and hide the main app
@@ -58,7 +62,7 @@ async function main() {
     
     // --- Event Listeners for Buttons ---
     signOutButton.addEventListener('click', () => {
-        Auth.signOut();
+        Amplify.Auth.signOut();
     });
 
     uploadButton.addEventListener('click', async () => {
@@ -73,7 +77,7 @@ async function main() {
         statusMessage.style.color = 'black';
 
         try {
-            const session = await Auth.currentSession();
+            const session = await Amplify.Auth.currentSession();
             const jwtToken = session.getIdToken().getJwtToken();
             const filenames = Array.from(fileInput.files).map(file => file.name);
 
@@ -120,12 +124,7 @@ async function main() {
     });
 
     // Check the initial auth state when the page loads
-    try {
-        const user = await Auth.currentAuthenticatedUser();
-        showAppContent(user);
-    } catch (err) {
-        showAuthenticator();
-    }
+    showAppContent();
 }
 
 // Run the main application logic
